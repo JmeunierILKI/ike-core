@@ -39,6 +39,8 @@ tLPRCasq7fw/jx3UnZlYAx5JiSgSl6wcr+eF+JDLLfZn4ExEqcwN03WHCXPPqede
 chmod 0400 /home/vagrant/ssh-private-key.pem
 cd /home/vagrant/
 bash <(curl -s https://raw.githubusercontent.com/ilkilab/ike-core/master/setup-deploy.sh)
+rm -rf ike-core
+git clone https://github.com/ilkilab/ike-core.git -b stable
 echo '
 [deploy]
 worker1 ansible_connection=local
