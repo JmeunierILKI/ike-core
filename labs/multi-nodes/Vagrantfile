@@ -55,6 +55,9 @@ worker1  ansible_host=10.10.20.4
 worker2  ansible_host=10.10.20.5
 worker3  ansible_host=10.10.20.6
 
+[storage]
+worker4 ansible_host=10.10.20.20
+
 [all:vars]
 advertise_masters=10.10.20.4
 #advertise_masters=kubernetes.localcluster.lan
@@ -81,7 +84,7 @@ expiry: "+3650d" # Default validity duration for PKI certificates.
 rotate_certificats: False # This parameter is used to renew K8S PKI certificats
 
 # Components version
-etcd_release: v3.4.10
+etcd_release: v3.4.14
 kubernetes_release: v1.19.4
 delete_previous_k8s_install: False
 delete_etcd_install: False
@@ -99,12 +102,13 @@ metallb_layer2_ips: 10.10.20.50-10.10.20.250 # Set Exeternal IP pool used by Ser
 metallb_secret_key: LGyt2l9XftOxEUIeFf2w0eCM7KjyQdkHform0gldYBKMORWkfQIsfXW0sQlo1VjJBB17shY5RtLg0klDNqNq4PAhNaub+olSka61LxV73KN2VaJY/snrZmHbdf/a7DfdzaeQ5pzP6D5O7zbUZwfb5ASOhNrG8aDMY3rkf4ZzHkc=
 
 # Custom features
-runtime: docker
+runtime: containerd
 ingress_controller: nginx
 populate_etc_hosts: True
 k8s_dashboard: True
 enable_metrics_server: True
 enable_persistence: True
+openebs_io_base_dir: /var/openebs
 enable_monitoring: True
 dashboard_admin_user: administrator
 dashboard_admin_password: P@ssw0rd
@@ -131,12 +135,12 @@ SCRIPT
 
 Vagrant.configure("2") do |config|
     config.vm.provision "shell", inline: $script
-    config.vm.box = "bento/centos-7"
+    config.vm.box = "bento/ubuntu-20.04"
 	config.vm.define "worker2" do |worker2|
 		worker2.vm.hostname = "worker2"
 		worker2.vm.network "private_network", ip: "10.10.20.5"
 		worker2.vm.provider "virtualbox" do |v|
-			v.memory = 3096
+			v.memory = 2096
 			v.cpus = 1
 			v.name = "worker2"
 		end
@@ -145,9 +149,19 @@ Vagrant.configure("2") do |config|
 		worker3.vm.hostname = "worker3"
 		worker3.vm.network "private_network", ip: "10.10.20.6"
 		worker3.vm.provider "virtualbox" do |v|
-			v.memory = 3096
+			v.memory = 2096
 			v.cpus = 1
 			v.name = "worker3"
+		end
+	end
+	config.vm.define "worker4" do |worker4|
+		worker4.vm.synced_folder ".", "/var/kubeconfig"
+		worker4.vm.hostname = "worker4"
+		worker4.vm.network "private_network", ip: "10.10.20.20"
+		worker4.vm.provider "virtualbox" do |v|
+			v.memory = 2096
+			v.cpus = 1
+			v.name = "worker4"
 		end
 	end
 	config.vm.define "worker1" do |worker1|
@@ -156,7 +170,7 @@ Vagrant.configure("2") do |config|
 		worker1.vm.hostname = "worker1"
 		worker1.vm.network "private_network", ip: "10.10.20.4"
 		worker1.vm.provider "virtualbox" do |v|
-			v.memory = 3096
+			v.memory = 2096
 			v.cpus = 1
 			v.name = "worker1"
 		end
